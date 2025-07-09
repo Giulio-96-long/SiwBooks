@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+  <section layout:fragment="content">
+    <!-- Riusa il fragment di books/list -->
+    <div th:replace="books/list :: content"></div>
+  </section>
+</html>

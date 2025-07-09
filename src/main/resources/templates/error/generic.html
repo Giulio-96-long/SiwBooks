@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/navbar :: layout}">
+<head>
+  <title>Errore</title>
+</head>
+<body>
+  <div layout:fragment="content">
+    <h1>Si è verificato un errore</h1>
+    <p>Ci scusiamo. Il problema è già stato segnalato al team tecnico.</p>
+    <a th:href="@{/books}">Torna ai libri</a>
+  </div>
+</body>
+</html>

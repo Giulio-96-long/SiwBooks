@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}" th:with="title=${author.firstName + ' ' + author.lastName}">
+
+
+<head>
+	<title layout:fragment="title">Dettaglio Autore</title>
+</head>
+
+<!-- Contenuto principale inserito in una card Bootstrap -->
+<section layout:fragment="content">
+	<div class="card mx-auto w-75">
+		<!-- Intestazione della card con il nome dell'autore -->
+		<div class="card-header">
+			<h2 class="mb-0" th:text="${author.firstName + ' ' + author.lastName}">Nome Cognome</h2>
+		</div>
+
+		<div class="card-body">
+			<div class="row">
+				<!-- Colonna foto -->
+				<div class="col-md-4 text-center">
+					<div class="mb-3">
+						<img th:if="${author.photo != null}" th:src="@{/authors/{id}/photo(id=${author.id})}"
+							class="img-fluid"
+							alt="Foto di [[${author.firstName}]] [[${author.lastName}]]" />
+
+						<svg th:if="${author.photo == null}" class="bd-placeholder-img rounded-circle" width="150"
+							height="150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="No photo"
+							preserveAspectRatio="xMidYMid slice">
+							<rect width="100%" height="100%" fill="#868e96"></rect>
+							<text x="50%" y="50%" fill="#dee2e6" dy=".3em" text-anchor="middle">No Photo</text>
+						</svg>
+					</div>
+				</div>
+
+				<!-- Colonna dati anagrafici -->
+				<div class="col-md-8">
+					<ul class="list-unstyled mb-3">
+						<li><strong>Data di nascita:</strong>
+							<span th:text="${#temporals.format(author.birthDate,'dd/MM/yyyy')}">01/01/1970</span>
+						</li>
+						<li><strong>Data di morte:</strong>
+							<span
+								th:text="${author.deathDate != null} ? ${#temporals.format(author.deathDate,'dd/MM/yyyy')} : '—'">—</span>
+						</li>
+						<li><strong>Nazionalità:</strong>
+							<span th:text="${author.nationality}">Nazionalità</span>
+						</li>
+					</ul>
+
+					<!-- Azioni utente ADMIN -->
+					<div th:if="${currentUser != null and currentUser.role == 'ADMIN'}" class="mb-3">
+						<a th:href="@{/authors/edit/{id}(id=${author.id})}" class="btn btn-warning me-2">Modifica</a>
+						<form th:action="@{/authors/{id}/delete(id=${author.id})}" method="post" class="d-inline">
+							<button type="submit" class="btn btn-danger">Elimina</button>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<!-- Sezione libri -->
+			<h5 class="mt-4">Libri di questo autore</h5>
+			<ul class="list-group list-group-flush">
+				<li th:each="b : ${author.books}"
+					class="list-group-item d-flex justify-content-between align-items-center">
+					<a th:href="@{/books/{id}(id=${b.id})}" class="stretched-link text-decoration-none">
+						<span th:text="${b.title}">Titolo</span>
+					</a>
+					<small class="text-muted" th:text="'(' + ${b.publicationYear} + ')'">(—)</small>
+				</li>
+				<li th:if="${#lists.isEmpty(author.books)}" class="list-group-item text-muted text-center">
+					Nessun libro associato.
+				</li>
+			</ul>
+		</div>
+	</div>
+</section>
+
+</html>

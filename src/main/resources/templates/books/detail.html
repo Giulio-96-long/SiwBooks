@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<div xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}" layout:fragment="content">
+
+	<div class="container py-4 border p-3">
+
+		<!-- Titolo -->
+		<div class="mb-4">
+			<h1 th:text="${book.title}">Titolo</h1>
+		</div>
+
+		<!-- Anno -->
+		<div class="row mb-3">
+			<div class="col-sm-2">
+				<strong>Anno</strong>
+			</div>
+			<div class="col-sm-10">
+				<span th:text="${book.publicationYear}">—</span>
+			</div>
+		</div>
+
+		<!-- Autori separati da virgola -->
+		<div class="row mb-4">
+			<div class="col-sm-2">
+				<strong>Autori</strong>
+			</div>
+			<div class="col-sm-10">
+				<span th:each="a, stat : ${book.authors}">
+					<span th:text="${a.firstName + ' ' + a.lastName}">Autore</span>
+					<span th:if="${!stat.last}">, </span>
+				</span>
+				<span th:if="${#lists.isEmpty(book.authors)}" class="text-muted">
+					Nessun autore disponibile.
+				</span>
+			</div>
+		</div>
+
+		<h5 class="mt-4">Immagini</h5>
+		<div class="d-flex flex-wrap mb-4">
+			<div th:each="img : ${book.images}" class="me-3 mb-3">
+				<div class="card" style="width: 150px;">
+					<img th:src="@{/books/{bookId}/images/{imgId}(bookId=${book.id},imgId=${img.id})}"
+						class="card-img-top" style="height:150px; object-fit:cover;" th:alt="'Immagine ' + ${img.id}" />
+				</div>
+			</div>
+
+			<div th:if="${#lists.isEmpty(book.images)}">
+				<p>Nessuna immagine disponibile.</p>
+			</div>
+		</div>
+
+
+		<!-- PULSANTI ADMIN -->
+		<a th:if="${currentUser != null and currentUser.role == 'ADMIN'}" class="btn btn-warning me-2"
+			th:href="@{|/books/edit/${book.id}|}">Modifica</a>
+		<form th:if="${currentUser != null and currentUser.role == 'ADMIN'}" th:action="@{|/books/${book.id}/delete|}"
+			method="post" style="display:inline">
+			<button class="btn btn-danger">Elimina</button>
+		</form>
+
+		<!-- RECENSIONI -->
+		<h2 class="mt-5">Recensioni</h2>
+		<div class="mb-4 p-3 border rounded">
+			<h4>
+				Valutazione media:
+				<span th:text="${averageRating}">0.0</span>/5
+			</h4>
+			<p>
+				Totale recensioni:
+				<span th:text="${totalReviews}">0</span>
+			</p>
+			<ul class="list-unstyled mb-0">
+				<li th:each="rc : ${ratingCounts}" class="d-flex align-items-center mb-1">
+					<span class="me-2">
+						<i th:each="i: ${#numbers.sequence(1,5)}" th:classappend="${i <= rc.rating}
+                              ? ' bi-star-fill text-warning'
+                              : ' bi-star text-muted'"></i>
+					</span>
+					<span class="badge bg-secondary" th:text="${rc.count}">0</span>
+				</li>
+			</ul>
+		</div>
+
+		<!-- Lista recensioni esistenti -->
+		<div th:each="r : ${reviewsPage.content}" class="border p-3 mb-3">
+			<h5>
+				<strong>Titolo:</strong>
+				<span th:text="${r.title}">Titolo Recensione</span>
+			</h5>
+			<p>
+				<strong>Utente:</strong>
+				<span th:text="${r.user.firstName + ' ' + r.user.lastName}">Utente</span>
+			</p>
+			<p>
+				<strong>Voto:</strong>
+				<span th:text="${r.rating}">5</span>/5
+			</p>
+			<p>
+				<strong>Descrizione:</strong>
+				<span th:text="${r.text}" class="text-break">Testo...</span>
+			</p>
+
+			<!-- Data di creazione, a pié di pagina -->
+			<small th:text="${#temporals.format(r.createdAt,'dd/MM/yyyy')}">01/01/2025</small>
+
+
+			<button type="button" class="btn btn-sm btn-outline-secondary mt-2"
+				th:if="${currentUser != null and r.user.id == currentUser.user.id}" data-bs-toggle="modal"
+				th:attr="data-bs-target=${'#editModal-' + r.id}">
+				<i class="bi bi-pencil-fill"></i> Modifica
+			</button>
+		</div>
+
+		<!-- Paginazione -->
+		<th:block th:with="tp=${reviewsPage.totalPages > 0} ? ${reviewsPage.totalPages} : 1">
+			<nav aria-label="Paginazione recensioni">
+				<ul class="pagination justify-content-center">
+
+					<!-- Previous: disabilitato se siamo alla prima pagina (o se c'è una sola pagina) -->
+					<li class="page-item" th:classappend="${reviewsPage.first || tp == 1} ? 'disabled'">
+						<a class="page-link" th:href="@{/books/{id}(id=${book.id}, page=${reviewsPage.number - 1})}"
+							tabindex="-1">«</a>
+					</li>
+
+					<!-- Numeri di pagina: da 0 a tp-1 -->
+					<li class="page-item" th:each="i : ${#numbers.sequence(0, tp - 1)}"
+						th:classappend="${i == reviewsPage.number} ? 'active'">
+						<a class="page-link" th:href="@{/books/{id}(id=${book.id}, page=${i})}" th:text="${i + 1}">1</a>
+					</li>
+
+					<!-- Next: disabilitato se siamo all'ultima pagina (o se c'è una sola pagina) -->
+					<li class="page-item" th:classappend="${reviewsPage.last || tp == 1} ? 'disabled'">
+						<a class="page-link"
+							th:href="@{/books/{id}(id=${book.id}, page=${reviewsPage.number + 1})}">»</a>
+					</li>
+
+				</ul>
+			</nav>
+		</th:block>
+
+		<!-- Pulsante Aggiungi recensione -->
+		<div th:if="${newReview != null}">
+			<button th:if="${currentUser != null and currentUser.role == 'USER'}" type="button"
+				class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#createModal">
+				Aggiungi recensione
+			</button>
+			<a th:if="${currentUser == null}" th:href="@{/login}" class="btn btn-primary">
+				Aggiungi recensione
+			</a>
+		</div>
+
+
+		<!-- MODALE DI CREAZIONE RECENSIONE -->
+		<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true"
+			th:if="${newReview != null}">
+			<div class="modal-dialog">
+				<!-- Inizio FORM -->
+				<form class="modal-content" th:action="@{/reviews/books/{bookId}(bookId=${book.id})}"
+					th:object="${newReview}" method="post">
+
+					<div class="modal-header">
+						<h5 class="modal-title" id="createModalLabel">Nuova recensione</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+
+					<div class="modal-body">
+						<!-- Campo Titolo -->
+						<div class="mb-3">
+							<label class="form-label">Titolo</label>
+							<input type="text" th:field="*{title}" class="form-control" required />
+						</div>
+						<!-- Campo Voto -->
+						<div class="mb-3">
+							<label class="form-label">Voto</label>
+							<select th:field="*{rating}" class="form-select" required>
+								<option th:each="i: ${#numbers.sequence(1,5)}" th:value="${i}" th:text="${i}">1
+								</option>
+							</select>
+						</div>
+						<!-- Campo Testo -->
+						<div class="mb-3">
+							<label class="form-label">Testo</label>
+							<textarea th:field="*{text}" class="form-control" rows="4" required></textarea>
+						</div>
+					</div>
+
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+							Annulla
+						</button>
+						<button type="submit" class="btn btn-primary">
+							Salva
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- Modali EDIT recensione -->
+		<div th:each="r : ${book.reviews}" th:if="${currentUser != null and r.user.id == currentUser.user.id}"
+			class="modal fade" th:id="${'editModal-' + r.id}" tabindex="-1" aria-hidden="true">
+			<div class="modal-dialog">
+				<form class="modal-content" th:action="@{/reviews/books/{bookId}/edit/{reviewId}
+                         (bookId=${book.id},reviewId=${r.id})}" th:object="${reviewToEdit}" method="post">
+					<div class="modal-header">
+						<h5 class="modal-title">Modifica recensione</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body">
+						<div class="mb-3">
+							<label class="form-label">Titolo</label>
+							<input type="text" th:field="*{title}" class="form-control" required />
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Voto</label>
+							<select th:field="*{rating}" class="form-select">
+								<option th:each="i : ${#numbers.sequence(1,5)}" th:value="${i}" th:text="${i}">1
+								</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Testo</label>
+							<textarea th:field="*{text}" class="form-control" rows="4" required></textarea>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+						<button type="submit" class="btn btn-warning">Aggiorna</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>

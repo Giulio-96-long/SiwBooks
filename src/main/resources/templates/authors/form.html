@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}" th:with="title=${author.id} == null ? 'Nuovo Autore' : 'Modifica Autore'">
+<div layout:fragment="content" class="container">
+	<div class="card h-100 border p-3">
+		<h1 th:text="${author.id} == null ? 'Nuovo Autore' : 'Modifica Autore'"></h1>
+
+		<form th:action="${author.id} == null ? @{/authors} : @{/authors/edit/{id}(id=${author.id})}"
+			th:object="${author}" method="post" enctype="multipart/form-data">
+
+			<div class="mb-3">
+				<label class="form-label">Nome</label>
+				<input type="text" th:field="*{firstName}" class="form-control" required />
+			</div>
+
+			<div class="mb-3">
+				<label class="form-label">Cognome</label>
+				<input type="text" th:field="*{lastName}" class="form-control" required />
+			</div>
+
+			<div class="mb-3">
+				<label class="form-label">Data di nascita</label>
+				<input type="date" th:field="*{birthDate}" class="form-control" required />
+			</div>
+
+			<div class="mb-3">
+				<label class="form-label">Data di morte (opzionale)</label>
+				<input type="date" th:field="*{deathDate}" class="form-control" />
+			</div>
+
+			<div class="mb-3">
+				<label class="form-label">Nazionalità</label>
+				<input type="text" th:field="*{nationality}" class="form-control" />
+			</div>
+
+			<!-- Input nuova foto e anteprima -->
+			<div class="mb-3">
+				<label for="photoFile" class="form-label">Foto (opzionale)</label>
+				<input type="file" id="photoFile" name="photoFile" accept="image/*" class="form-control" />
+
+				<div id="previewContainer" class="mt-2" style="display:none;">
+					<div class="position-relative d-inline-block" style="max-width:150px;">
+						<img id="previewImg" class="img-thumbnail" style="width:150px; height:auto; object-fit:cover;"
+							alt="Anteprima foto" />
+						<button type="button" id="removePreview"
+							class="btn btn-sm btn-danger position-absolute top-0 end-0">&times;</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Submit principale -->
+			<button type="submit" class="btn btn-primary">Salva</button>
+			<a th:href="@{/authors}" class="btn btn-secondary">Annulla</a>
+		</form>
+
+		<!-- Foto esistente e delete (solo edit) -->
+		<div th:if="${author.id != null and author.photo != null}" id="storedPhoto" class="mt-4">
+			<p>Foto salvata:</p>
+			<div class="position-relative d-inline-block" style="max-width:150px;">
+				<img th:src="@{/authors/{id}/photo(id=${author.id})}" class="img-thumbnail"
+					style="width:150px; height:auto; object-fit:cover;" alt="Foto autore" />
+				<form th:action="@{/authors/{id}/photo(id=${author.id})}" method="post"
+					style="position:absolute; top:0; right:0;"
+					onsubmit="return confirm('Sei sicuro di voler eliminare la foto?');">
+					<input type="hidden" name="_method" value="delete" />
+					<button type="submit" class="btn btn-sm btn-danger p-1">&times;</button>
+				</form>
+			</div>
+		</div>
+	</div>
+	<!-- Script gestione anteprima -->
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		document.addEventListener('DOMContentLoaded', () => {
+			const fileInput = document.getElementById('photoFile');
+			const previewContainer = document.getElementById('previewContainer');
+			const previewImg = document.getElementById('previewImg');
+			const removeBtn = document.getElementById('removePreview');
+			const storedDiv = document.getElementById('storedPhoto');
+
+			function resetPreview() {
+				fileInput.value = '';
+				previewContainer.style.display = 'none';
+				if (storedDiv) storedDiv.style.display = 'block';
+			}
+
+			if (fileInput) {
+				fileInput.addEventListener('change', () => {
+					const file = fileInput.files[0];
+					if (file) {
+						const url = URL.createObjectURL(file);
+						previewImg.src = url;
+						previewContainer.style.display = 'block';
+						if (storedDiv) storedDiv.style.display = 'none';
+					} else {
+						resetPreview();
+					}
+				});
+			}
+
+			if (removeBtn) {
+				removeBtn.addEventListener('click', resetPreview);
+			}
+		});
+	   /*]]>*/
+	</script>
+
+</div>
+
+
+</html>

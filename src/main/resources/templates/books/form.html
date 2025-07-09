@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<div layout:fragment="content">
+  <div class="card h-100 border p-3">
+
+    <!-- Titolo pagina -->
+    <h1 th:text="${bookForm.id == null or bookForm.id == 0 ? 'Nuovo Libro' : 'Modifica Libro'}"></h1>
+
+    <!-- FORM UNIFICATO PER NEW ED EDIT -->
+    <form th:object="${bookForm}"
+          th:action="${bookForm.id == null or bookForm.id == 0} ? @{/books/new} : @{/books/edit/{id}(id=${bookForm.id})}"
+          method="post"
+          enctype="multipart/form-data">
+      <input type="hidden" th:field="*{id}" />
+
+      <!-- Campi base -->
+      <div class="mb-3">
+        <label class="form-label">Titolo</label>
+        <input type="text" th:field="*{title}" class="form-control" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Anno Pubblicazione</label>
+        <input type="number" th:field="*{publicationYear}" class="form-control" required />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Autori</label>
+        <div class="d-flex flex-wrap">
+          <div th:each="aut : ${allAuthors}" class="form-check me-3 mb-2">
+            <input type="checkbox"
+                   class="form-check-input"
+                   th:field="*{authorIds}"
+                   th:value="${aut.id}"
+                   th:id="${'chk-aut-' + aut.id}" />
+            <label class="form-check-label"
+                   th:for="${'chk-aut-' + aut.id}"
+                   th:text="${aut.firstName + ' ' + aut.lastName}"></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selezione nuove immagini -->
+      <div class="mb-3">
+        <label class="form-label">Seleziona Immagini</label>
+        <input type="file"
+               id="imagesInput"
+               name="images"
+               multiple
+               class="form-control" />
+        <small class="form-text text-muted">Anteprima e seleziona copertina dalle nuove.</small>
+      </div>
+
+      <!-- Anteprima nuove immagini -->
+      <div class="mb-3">
+        <div id="previewContainer" class="d-flex flex-wrap gap-2"></div>
+      </div>
+      <div class="mb-3" id="coverOptions"></div>
+
+      <!-- Immagini già caricate -->
+      <div class="mt-4" th:if="${book != null and not #lists.isEmpty(book.images)}">
+        <p>Immagini già caricate:</p>
+        <div class="d-flex flex-wrap">
+          <div th:each="img : ${book.images}"
+               class="position-relative me-2 mb-2"
+               style="width:100px;">
+            <img th:src="@{/books/{b}/images/{i}(b=${book.id},i=${img.id})}"
+                 class="img-thumbnail"
+                 style="width:100%;height:100px;object-fit:cover;" />
+
+				 <div class="position-absolute top-0 end-0 p-1">
+				   <button type="button"
+				           class="btn btn-sm btn-danger"
+				           th:onclick="'submitImageDelete(' + ${book.id} + ',' + ${img.id} + ')'">
+				     <i class="bi bi-trash"></i>
+				   </button>
+				 </div>
+
+            <div class="form-check mt-1 text-center">
+				<input type="radio"
+				       th:field="*{existingCoverImageId}"
+				       th:value="${img.id}"
+				       class="form-check-input" />
+              <label class="form-check-label">Copertina</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Salva / Annulla -->
+      <button type="submit" class="btn btn-primary" th:text="${bookForm.id == null or bookForm.id == 0 ? 'Crea' : 'Salva'}"></button>
+      <a th:href="@{/books}" class="btn btn-secondary ms-2">Annulla</a>
+    </form>
+
+  </div>
+
+  <!-- SCRIPT PREVIEW & COVER -->
+  <script th:inline="javascript">
+  /*<![CDATA[*/
+  
+  function submitImageDelete(bookId, imageId) {
+       if (confirm('Confermi eliminazione?')) {
+         const form = document.createElement('form');
+         form.method = 'POST';
+         form.action = `/books/${bookId}/images/${imageId}/delete`;
+         document.body.appendChild(form);
+         form.submit();
+       }
+     }
+	 
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('imagesInput');
+      const preview = document.getElementById('previewContainer');
+      const coverOpts = document.getElementById('coverOptions');
+      const dt = new DataTransfer();
+	  
+	
+
+      if (!input) return;
+
+      input.addEventListener('change', () => {
+        dt.clearData();
+        Array.from(input.files).forEach(f => dt.items.add(f));
+        input.files = dt.files;
+
+        preview.innerHTML = '';
+        coverOpts.innerHTML = '';
+
+        Array.from(dt.files).forEach((file, i) => {
+          const url = URL.createObjectURL(file);
+
+          const wrap = document.createElement('div');
+          wrap.classList.add('position-relative','me-2','mb-2');
+          wrap.style.width = '100px';
+
+          const img = document.createElement('img');
+          img.src = url;
+          img.classList.add('img-thumbnail');
+          img.style = 'width:100px;height:100px;object-fit:cover;';
+          wrap.appendChild(img);
+
+          preview.appendChild(wrap);
+
+          const radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = 'newCoverIndex';
+          radio.value = i;
+          radio.classList.add('form-check-input');
+
+          // Deselecta immagini esistenti se selezioni questa
+          radio.addEventListener('change', () => {
+            const old = document.querySelector('input[name="existingCoverImageId"]:checked');
+            if (old) old.checked = false;
+          });
+
+          const label = document.createElement('label');
+          label.classList.add('form-check-label','ms-1');
+          label.textContent = file.name;
+
+          const radioWrap = document.createElement('div');
+          radioWrap.classList.add('form-check','me-2');
+          radioWrap.append(radio, label);
+          coverOpts.appendChild(radioWrap);
+        });
+
+        // Deselecta nuove se clicco su una esistente
+        document.querySelectorAll('input[name="existingCoverImageId"]').forEach(r => {
+          r.addEventListener('change', () => {
+            if (r.checked) {
+              document.querySelectorAll('input[name="newCoverIndex"]').forEach(nr => nr.checked = false);
+            }
+          });
+        });
+      });
+    });
+  /*]]>*/
+  </script>
+
+</div>
+</html>

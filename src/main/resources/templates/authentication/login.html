@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+	  
+<head>
+	<title layout:fragment="title">Login</title>
+</head>
+
+<body>
+	<div layout:fragment="content" class="d-flex justify-content-center align-items-center" style="min-height:80vh;">
+		<div class="card p-4" style="width: 100%; max-width: 400px;">
+			<h3 class="card-title text-center mb-4">Login</h3>
+
+			<div th:if="${loginError}" class="mb-3">	
+			  <p class="text-danger" th:text="${loginError}"></p>
+			</div>
+			<div th:if="${emailExistsError}" class="mb-3">
+			  <p class="text-danger" th:text="${emailExistsError}"></p>
+			</div>
+			<form th:action="@{/login}" method="post">
+				<div class="mb-3">
+					<label for="email" class="form-label">Email</label>
+					<input id="email" name="email" type="email" class="form-control" placeholder="tuo@esempio.com"
+						required />
+				</div>
+				<div class="mb-3">
+					<label for="password" class="form-label">Password</label>
+					<input id="password" name="password" type="password" class="form-control" placeholder="••••••••"
+						required />
+				</div>
+				<button type="submit" class="btn btn-primary w-100">Accedi</button>
+			</form>
+
+			<div class="text-center my-3">
+				<span class="text-muted">oppure</span>
+			</div>
+
+			<!-- PULSANTE OAUTH2 -->
+			<div class="d-grid gap-2">
+				<a th:href="@{/oauth2/authorization/google}" class="btn btn-outline-danger">
+					<i class="bi bi-google"></i> Accedi con Google
+				</a>
+			</div>
+
+			<div class="text-center mt-3">
+				<a th:href="@{/register}">Non hai un account? Registrati</a>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

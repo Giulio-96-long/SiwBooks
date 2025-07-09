@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/head :: layout}">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Signup / Login</title>
+
+</head>
+<body>
+  <div class="auth-card">
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="authTab" role="tablist">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#login">Login</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#register">Register</button></li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- LOGIN -->
+      <div class="tab-pane fade show active" id="login">
+        <form th:action="@{/auth/login}" th:object="${loginRequest}" method="post" id="loginForm">
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" th:field="*{email}" class="form-control" placeholder="Email" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" th:field="*{password}" class="form-control" placeholder="Password" required/>
+          </div>
+          <div th:if="${loginError}" class="alert alert-danger" th:text="${loginError}"></div>
+          <button class="btn btn-primary w-100 mb-2" type="submit">Login</button>
+        </form>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="tab-pane fade" id="register">
+        <form th:action="@{/auth/register}" th:object="${registerRequest}" method="post" id="signupForm">
+          <div class="mb-3">
+            <label class="form-label">Nome</label>
+            <input type="text" th:field="*{firstName}" class="form-control" placeholder="Nome" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cognome</label>
+            <input type="text" th:field="*{lastName}" class="form-control" placeholder="Cognome" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" th:field="*{email}" class="form-control" placeholder="Email" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" th:field="*{password}" class="form-control" placeholder="Password" required/>
+          </div>
+          <div th:if="${registerError}" class="alert alert-danger" th:text="${registerError}"></div>
+          <button class="btn btn-success w-100" type="submit">Register</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

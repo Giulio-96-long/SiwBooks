@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}"
+      th:with="title='Il tuo profilo'">
+  <div layout:fragment="content">
+    <h1>Il tuo profilo</h1>
+
+    <form th:action="@{/profile}" th:object="${userDto}" method="post">
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input id="email" type="email" th:field="*{email}" class="form-control" required/>
+      </div>
+      <div class="mb-3">
+        <label for="firstName" class="form-label">Nome</label>
+        <input id="firstName" type="text" th:field="*{firstName}" class="form-control" required/>
+      </div>
+      <div class="mb-3">
+        <label for="lastName" class="form-label">Cognome</label>
+        <input id="lastName" type="text" th:field="*{lastName}" class="form-control" required/>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Salva modifiche</button>
+      <a th:href="@{/profile/change-password}" class="btn btn-secondary ms-2">Cambia password</a>
+    </form>
+
+    <!-- Elimina account -->
+    <form th:action="@{/profile/delete}" method="post" class="mt-4" 
+          onsubmit="return confirm('Sei sicuro di voler eliminare il profilo?');">
+      <button class="btn btn-danger">Elimina il mio profilo</button>
+    </form>
+
+    <!-- Feedback -->
+    <div th:if="${success}" class="alert alert-success mt-3" th:text="${success}"></div>
+  </div>
+</html>

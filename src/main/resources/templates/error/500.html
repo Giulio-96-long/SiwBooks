@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+  <title layout:fragment="title">Errore 500</title>
+  <div layout:fragment="content"
+       class="bg-light d-flex align-items-center justify-content-center"
+       style="height:100vh;">
+    <div class="card shadow-sm" style="max-width:480px;width:100%;">
+      <div class="card-body text-center p-4">
+        <h1 class="display-5 text-secondary mb-3">Errore 500 – Errore interno</h1>
+        <p class="lead mb-4" th:text="${message}">Ci scusiamo per il disagio.</p>
+        <a th:href="@{/books}" class="btn btn-secondary">Torna ai libri</a>
+      </div>
+    </div>
+  </div>
+</html>
