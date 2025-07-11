@@ -16,16 +16,20 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.*;
 import org.springframework.stereotype.Service;
 import com.example.demo.entity.Credentials;
+import com.example.demo.entity.User;
 import com.example.demo.repository.CredentialsRepository;
+import com.example.demo.repository.UserRepository;
 
 
 @Service
 public class CustomOidcUserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
 
     private final CredentialsRepository credentialsRepository;
+    private final UserRepository userRepository;
 
-    public CustomOidcUserService(CredentialsRepository credentialsRepository) {
+    public CustomOidcUserService(CredentialsRepository credentialsRepository, UserRepository userRepository) {
         this.credentialsRepository = credentialsRepository;
+		this.userRepository = userRepository;
     }
 
     @Override
@@ -41,16 +45,20 @@ public class CustomOidcUserService implements OAuth2UserService<OidcUserRequest,
 
         Optional<Credentials> optionalCred = credentialsRepository.findByEmail(email);
         Credentials creds;
-        boolean isNew = false;
+       
         if (optionalCred.isPresent()) {
             creds = optionalCred.get();
         } else {
+        	User user = new User();
+        	user.setFirstName(oidcUser.getAttribute("given_name"));
+        	user.setLastName(oidcUser.getAttribute("family_name"));
             creds = new Credentials();
+            creds.setUser(user);
             creds.setEmail(email);
             creds.setRole("USER");  
-            creds.setPassword("");
-            credentialsRepository.save(creds);
-            isNew = true;
+            creds.setPassword("oauth2-user"); 
+            user.setCredentials(creds);
+            userRepository.save(user); 
         }
 
         String dbRole = creds.getRole();          

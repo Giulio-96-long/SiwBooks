@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.example.demo.entity.Book;
-
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
 
 @Entity
 @Table(name = "author")
@@ -15,17 +15,21 @@ public class Author {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
+    @NotBlank(message = "Il nome è obbligatorio")
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
+    @NotBlank(message = "Il cognome è obbligatorio")
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
+    @Past(message = "La data di nascita deve essere nel passato")
     @Column(name="birth_date")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate birthDate;
-
+    
+    @Past(message = "La data di morte deve essere nel passato")
     @Column(name="death_date")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate deathDate;

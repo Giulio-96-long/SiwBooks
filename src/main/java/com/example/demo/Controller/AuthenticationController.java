@@ -1,9 +1,9 @@
 package com.example.demo.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.example.demo.dto.LoginRequestDto;
 import com.example.demo.dto.RegisterRequestDto;
 import com.example.demo.serviceImpl.service.UserService;
+
+import jakarta.validation.Valid;
 
 
 @Controller
@@ -43,11 +45,14 @@ public class AuthenticationController {
 	}
 
 	@PostMapping("/register")
-	public String doRegister(@ModelAttribute("registration") RegisterRequestDto dto) {
-
-		userService.register(dto);
-		return "redirect:/login";
-
+	public String doRegister(
+	    @Valid @ModelAttribute("registration") RegisterRequestDto dto,
+	    BindingResult br) {
+	    if (br.hasErrors()) {
+	        return "authentication/register";
+	    }
+	    userService.register(dto);
+	    return "redirect:/login";
 	}
 
 	@GetMapping("/default")

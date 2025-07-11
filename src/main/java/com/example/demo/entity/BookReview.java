@@ -3,6 +3,10 @@ package com.example.demo.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "book_review")
@@ -12,11 +16,16 @@ public class BookReview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Size(min = 2, max = 100, message = "Il titolo deve avere almeno 3 caratteri")
     private String title;
 
+
+	@Min(value = 1, message = "Il voto minimo è 1")
+	@Max(value = 5, message = "Il voto massimo è 5")
     @Column(nullable = false)
     private int rating;
 
+	@NotBlank(message = "Il testo della recensione è obbligatorio")
     @Column(columnDefinition = "TEXT")
     private String text;
 

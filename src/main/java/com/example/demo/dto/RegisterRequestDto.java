@@ -1,16 +1,27 @@
 package com.example.demo.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class RegisterRequestDto {
 
+	@NotBlank(message = "Il nome è obbligatorio")
 	private String firstName;
-	
+
+	@NotBlank(message = "Il cognome è obbligatorio")
 	private String lastName;
-	
+
+	@NotBlank(message = "L'email è obbligatoria")
+	@Email(message = "Email non valida")
 	private String email;
-	
+
+	@NotBlank(message = "La password è obbligatoria")
+	@Size(min = 6, message = "La password deve contenere almeno 6 caratteri")
 	private String password;
-	
-	public RegisterRequestDto() {}
+
+	public RegisterRequestDto() {
+	}
 
 	public String getFirstName() {
 		return firstName;

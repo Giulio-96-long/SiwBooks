@@ -8,19 +8,28 @@
 		<form th:action="${author.id} == null ? @{/authors} : @{/authors/edit/{id}(id=${author.id})}"
 			th:object="${author}" method="post" enctype="multipart/form-data">
 
+			<div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
+				<ul>
+					<li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+				</ul>
+			</div>
+
 			<div class="mb-3">
 				<label class="form-label">Nome</label>
 				<input type="text" th:field="*{firstName}" class="form-control" required />
+				<div class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
 			</div>
 
 			<div class="mb-3">
 				<label class="form-label">Cognome</label>
 				<input type="text" th:field="*{lastName}" class="form-control" required />
+				<div class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
 			</div>
 
 			<div class="mb-3">
 				<label class="form-label">Data di nascita</label>
 				<input type="date" th:field="*{birthDate}" class="form-control" required />
+				<div class="text-danger" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></div>
 			</div>
 
 			<div class="mb-3">
@@ -29,7 +38,7 @@
 			</div>
 
 			<div class="mb-3">
-				<label class="form-label">Nazionalità</label>
+				<label class="form-label">Nazionalità (opzionale)</label>
 				<input type="text" th:field="*{nationality}" class="form-control" />
 			</div>
 

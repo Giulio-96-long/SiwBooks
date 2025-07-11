@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "user")
@@ -12,8 +13,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Il nome è obbligatorio")
     private String firstName;
     
+    @NotBlank(message = "Il cognome è obbligatorio")
     private String lastName;
     
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

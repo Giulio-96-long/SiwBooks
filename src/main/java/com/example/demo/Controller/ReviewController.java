@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.example.demo.entity.BookReview;
 import com.example.demo.serviceImpl.service.CredentialsService;
 import com.example.demo.serviceImpl.service.ReviewService;
+
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/reviews")
@@ -57,21 +60,38 @@ public class ReviewController {
 	}
 
 	@PostMapping("/books/{bookId}")
-	public String addReview(@PathVariable Long bookId, @ModelAttribute("newReview") BookReview newReview) {
+	public String addReview(
+	    @PathVariable Long bookId,
+	    @Valid @ModelAttribute("newReview") BookReview newReview,
+	    BindingResult br,
+	    Model model) {
 
-		reviewService.addReview(bookId, newReview);
-		return "redirect:/books/" + bookId;
+	    if (br.hasErrors()) {
+	     
+	        return "redirect:/books/" + bookId;
+	    }
 
+	    reviewService.addReview(bookId, newReview);
+	    return "redirect:/books/" + bookId;
 	}
+
 
 	@PostMapping("/books/{bookId}/edit/{reviewId}")
-	public String editReview(@PathVariable Long bookId, @PathVariable Long reviewId,
-			@ModelAttribute("reviewToEdit") BookReview reviewForm) {
+	public String editReview(
+	    @PathVariable Long bookId,
+	    @PathVariable Long reviewId,
+	    @Valid @ModelAttribute("reviewToEdit") BookReview reviewForm,
+	    BindingResult br,
+	    Model model) {
 
-		reviewService.updateReview(reviewId, reviewForm);
-		return "redirect:/books/" + bookId;
+	    if (br.hasErrors()) {
+	        return "redirect:/books/" + bookId; // meglio se ricarichi la pagina con errori
+	    }
 
+	    reviewService.updateReview(reviewId, reviewForm);
+	    return "redirect:/books/" + bookId;
 	}
+
 
 	@PostMapping("/{id}/delete")
 	public String deleteReview(@PathVariable Long id) {

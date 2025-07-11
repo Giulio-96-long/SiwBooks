@@ -1,24 +1,22 @@
 package com.example.demo.Controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.demo.dto.AuthorDto;
 import com.example.demo.entity.Author;
 import com.example.demo.serviceImpl.service.AuthorService;
+
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/authors")
@@ -82,13 +80,17 @@ public class AuthorController {
 	}
 
 	@PostMapping
-	public String createAuthor(@
-			ModelAttribute Author author, 
-			@RequestParam("photoFile") MultipartFile photoFile) {
+	public String createAuthor(
+	    @Valid @ModelAttribute Author author,
+	    BindingResult br,
+	    @RequestParam("photoFile") MultipartFile photoFile) {
 
-		authorService.createAuthor(author, photoFile);
-		return "redirect:/authors";
+	    if (br.hasErrors()) {
+	        return "authors/form";
+	    }
 
+	    authorService.createAuthor(author, photoFile);
+	    return "redirect:/authors";
 	}
 
 	@GetMapping("/edit/{id}")
@@ -98,13 +100,20 @@ public class AuthorController {
 	}
 
 	@PostMapping("/edit/{id}")
-	public String updateAuthor(@PathVariable Long id, @ModelAttribute Author author,
-			@RequestParam(name = "photoFile", required = false) MultipartFile photoFile) {
+	public String updateAuthor(
+	    @PathVariable Long id,
+	    @Valid @ModelAttribute Author author,
+	    BindingResult br,
+	    @RequestParam(name = "photoFile", required = false) MultipartFile photoFile) {
 
-		authorService.updateAuthor(id, author, photoFile);
-		return "redirect:/authors/" + id;
+	    if (br.hasErrors()) {
+	        return "authors/form";
+	    }
 
+	    authorService.updateAuthor(id, author, photoFile);
+	    return "redirect:/authors/" + id;
 	}
+
 
 	@DeleteMapping("/{id}/photo")
 	public String deleteAuthorPhoto(@PathVariable Long id) {

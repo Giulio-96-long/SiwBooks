@@ -15,23 +15,23 @@
 					<form th:action="@{/register}" th:object="${registration}" method="post">
 						<div class="mb-3">
 							<label for="firstName" class="form-label">Nome</label>
-							<input id="firstName" th:field="*{firstName}" type="text" class="form-control"
-								placeholder="Inserisci il nome" required />
+							<input id="firstName" th:field="*{firstName}" type="text" class="form-control" placeholder="Inserisci il nome" />
+							<div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" class="text-danger small"></div>
 						</div>
 						<div class="mb-3">
 							<label for="lastName" class="form-label">Cognome</label>
-							<input id="lastName" th:field="*{lastName}" type="text" class="form-control"
-								placeholder="Inserisci il cognome" required />
+							<input id="lastName" th:field="*{lastName}" type="text" class="form-control" placeholder="Inserisci il cognome" />
+							<div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" class="text-danger small"></div>
 						</div>
 						<div class="mb-3">
 							<label for="email" class="form-label">Email</label>
-							<input id="email" th:field="*{email}" type="email" class="form-control"
-								placeholder="nome@esempio.com" required />
+							<input id="email" th:field="*{email}" type="email" class="form-control" placeholder="nome@esempio.com" />
+							<div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-danger small"></div>
 						</div>
 						<div class="mb-3">
 							<label for="password" class="form-label">Password</label>
-							<input id="password" th:field="*{password}" type="password" class="form-control"
-								placeholder="******" required />
+							<input id="password" th:field="*{password}" type="password" class="form-control" placeholder="******" />
+							<div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-danger small"></div>
 						</div>
 						<div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
 							<ul>

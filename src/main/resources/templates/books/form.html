@@ -14,16 +14,25 @@
           th:action="${bookForm.id == null or bookForm.id == 0} ? @{/books/new} : @{/books/edit/{id}(id=${bookForm.id})}"
           method="post"
           enctype="multipart/form-data">
+		  
+		  <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
+		    <ul>
+		      <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+		    </ul>
+		  </div>
+		  
       <input type="hidden" th:field="*{id}" />
 
       <!-- Campi base -->
       <div class="mb-3">
         <label class="form-label">Titolo</label>
         <input type="text" th:field="*{title}" class="form-control" required />
+		<div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
       </div>
       <div class="mb-3">
         <label class="form-label">Anno Pubblicazione</label>
         <input type="number" th:field="*{publicationYear}" class="form-control" required />
+		<div class="text-danger" th:if="${#fields.hasErrors('publicationYear')}" th:errors="*{publicationYear}"></div>
       </div>
       <div class="mb-3">
         <label class="form-label">Autori</label>
@@ -98,84 +107,160 @@
   <!-- SCRIPT PREVIEW & COVER -->
   <script th:inline="javascript">
   /*<![CDATA[*/
-  
-  function submitImageDelete(bookId, imageId) {
-       if (confirm('Confermi eliminazione?')) {
-         const form = document.createElement('form');
-         form.method = 'POST';
-         form.action = `/books/${bookId}/images/${imageId}/delete`;
-         document.body.appendChild(form);
-         form.submit();
-       }
-     }
-	 
-    document.addEventListener('DOMContentLoaded', () => {
-      const input = document.getElementById('imagesInput');
-      const preview = document.getElementById('previewContainer');
-      const coverOpts = document.getElementById('coverOptions');
-      const dt = new DataTransfer();
-	  
-	
+  document.addEventListener('DOMContentLoaded', () => {
+    const input      = document.getElementById('imagesInput');
+    const preview    = document.getElementById('previewContainer');
+    const coverOpts  = document.getElementById('coverOptions');
 
-      if (!input) return;
+    if (!input || !preview || !coverOpts) return;
 
-      input.addEventListener('change', () => {
-        dt.clearData();
-        Array.from(input.files).forEach(f => dt.items.add(f));
-        input.files = dt.files;
+    let currentFiles = [];
+    let lastNewRadio = null;
 
-        preview.innerHTML = '';
-        coverOpts.innerHTML = '';
+    input.addEventListener('change', () => {
+      const newFiles = Array.from(input.files);
 
-        Array.from(dt.files).forEach((file, i) => {
-          const url = URL.createObjectURL(file);
+      for (const file of newFiles) {
+        if (!currentFiles.some(f => f.name === file.name && f.size === file.size)) {
+          currentFiles.push(file);
+        }
+      }
 
-          const wrap = document.createElement('div');
-          wrap.classList.add('position-relative','me-2','mb-2');
-          wrap.style.width = '100px';
+      renderPreviews();
+    });
 
-          const img = document.createElement('img');
-          img.src = url;
-          img.classList.add('img-thumbnail');
-          img.style = 'width:100px;height:100px;object-fit:cover;';
-          wrap.appendChild(img);
+    function renderPreviews() {
+      const transfer = new DataTransfer();
+      currentFiles.forEach(file => transfer.items.add(file));
+      input.files = transfer.files;
 
-          preview.appendChild(wrap);
+      preview.innerHTML = '';
+      coverOpts.innerHTML = '';
 
-          const radio = document.createElement('input');
-          radio.type = 'radio';
-          radio.name = 'newCoverIndex';
-          radio.value = i;
-          radio.classList.add('form-check-input');
+      currentFiles.forEach((file, idx) => {
+        const url = URL.createObjectURL(file);
 
-          // Deselecta immagini esistenti se selezioni questa
-          radio.addEventListener('change', () => {
-            const old = document.querySelector('input[name="existingCoverImageId"]:checked');
-            if (old) old.checked = false;
-          });
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'position:relative;display:inline-block;margin:0.25rem;width:100px;height:100px;';
 
-          const label = document.createElement('label');
-          label.classList.add('form-check-label','ms-1');
-          label.textContent = file.name;
+        const img = document.createElement('img');
+        img.src = url;
+        img.onload = () => URL.revokeObjectURL(url);
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+        img.classList.add('img-thumbnail');
+        wrap.appendChild(img);
 
-          const radioWrap = document.createElement('div');
-          radioWrap.classList.add('form-check','me-2');
-          radioWrap.append(radio, label);
-          coverOpts.appendChild(radioWrap);
+        // bottone X
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = '×';
+        Object.assign(btn.style, {
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          background: 'rgba(255,255,255,0.8)',
+          border: 'none',
+          color: 'red',
+          fontSize: '1.4rem',
+          lineHeight: '1',
+          padding: '0',
+          cursor: 'pointer',
+          zIndex: '10'
+        });
+        btn.title = 'Rimuovi';
+
+        btn.addEventListener('click', () => {
+          const removedFile = currentFiles[idx];
+          currentFiles = currentFiles.filter(f => f !== removedFile);
+          if (lastNewRadio && lastNewRadio.value == idx.toString()) {
+            lastNewRadio = null;
+          }
+          renderPreviews();
         });
 
-        // Deselecta nuove se clicco su una esistente
-        document.querySelectorAll('input[name="existingCoverImageId"]').forEach(r => {
-          r.addEventListener('change', () => {
-            if (r.checked) {
-              document.querySelectorAll('input[name="newCoverIndex"]').forEach(nr => nr.checked = false);
-            }
-          });
+        wrap.appendChild(btn);
+        preview.appendChild(wrap);
+
+        // radio copertina (una sola tra nuove e vecchie)
+        const radioWrap = document.createElement('div');
+        radioWrap.classList.add('form-check', 'mt-1');
+
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'newCoverIndex';
+        radio.value = idx;
+        radio.id = `new-cover-${idx}`;
+        radio.classList.add('form-check-input');
+
+        const lbl = document.createElement('label');
+        lbl.htmlFor = radio.id;
+        lbl.textContent = 'Copertina';
+        lbl.classList.add('form-check-label', 'ms-1');
+        lbl.style.display = 'none';
+
+        radio.addEventListener('click', function (e) {
+          if (lastNewRadio === this) {
+            this.checked = false;
+            lbl.style.display = 'none';
+            lastNewRadio = null;
+            e.preventDefault();
+          } else {
+            lastNewRadio = this;
+            document.querySelectorAll('label[for^="new-cover-"]').forEach(l => l.style.display = 'none');
+            lbl.style.display = 'inline';
+
+            // deseleziona eventuale immagine esistente
+            const existing = document.querySelector('input[name="existingCoverImageId"]:checked');
+            if (existing) existing.checked = false;
+          }
         });
+
+        radioWrap.append(radio, lbl);
+        coverOpts.appendChild(radioWrap);
+      });
+    }
+
+    // disattiva la radio tra le nuove se seleziono una esistente
+    document.querySelectorAll('input[name="existingCoverImageId"]').forEach(radio => {
+      radio.addEventListener('click', () => {
+        if (lastNewRadio) {
+          lastNewRadio.checked = false;
+          const lbl = document.querySelector(`label[for="${lastNewRadio.id}"]`);
+          if (lbl) lbl.style.display = 'none';
+          lastNewRadio = null;
+        }
       });
     });
+  });
+  
+  window.submitImageDelete = function(bookId, imageId) {
+    if (!confirm('Vuoi davvero eliminare questa immagine?')) return;
+
+    fetch(`/books/${bookId}/images/${imageId}`, {
+      method: 'DELETE',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => {
+      if (response.ok) {
+        // rimuove il div che contiene l'immagine eliminata
+        const button = document.querySelector(`button[onclick="submitImageDelete(${bookId},${imageId})"]`);
+        const container = button?.closest('.position-relative');
+        if (container) container.remove();
+      } else {
+        alert('Errore durante l\'eliminazione dell\'immagine.');
+      }
+    })
+    .catch(err => {
+      console.error('Errore durante la richiesta DELETE:', err);
+      alert('Errore di rete durante l\'eliminazione.');
+    });
+  };
+
   /*]]>*/
   </script>
+
 
 </div>
 </html>

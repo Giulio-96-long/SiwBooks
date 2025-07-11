@@ -1,9 +1,15 @@
 package com.example.demo.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class LoginRequestDto {
 
+	@NotBlank(message = "Inserisci l'email")
+	@Email(message = "Email non valida")
 	private String email;
-	
+
+	@NotBlank(message = "Inserisci la password")
 	private String password;
 
 	public String getEmail() {

@@ -1,22 +1,20 @@
 package com.example.demo.Controller;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +34,8 @@ import com.example.demo.entity.BookReview;
 import com.example.demo.serviceImpl.service.AuthorService;
 import com.example.demo.serviceImpl.service.BookService;
 import com.example.demo.serviceImpl.service.ReviewService;
+
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/books")
@@ -120,12 +120,20 @@ public class BookController {
 	}
 
 	@PostMapping("/new")
-	public String createBook(@ModelAttribute("bookForm") BookFormDto form) {
+	public String createBook(
+	    @Valid @ModelAttribute("bookForm") BookFormDto form,
+	    BindingResult br,
+	    Model model) {
 
-		Book saved = bookService.saveBook(0L, form);
-		return "redirect:/books/" + saved.getId();
+	    if (br.hasErrors()) {
+	        model.addAttribute("allAuthors", authorService.getAllAuthors());
+	        return "books/form";
+	    }
 
+	    Book saved = bookService.saveBook(0L, form);
+	    return "redirect:/books/" + saved.getId();
 	}
+
 
 	@GetMapping("/edit/{id}")
 	public String editBookForm(@PathVariable Long id, Model model) {
@@ -140,12 +148,22 @@ public class BookController {
 	}
 
 	@PostMapping("/edit/{id}")
-	public String updateBook(@PathVariable Long id, @ModelAttribute("bookForm") BookFormDto form) {
-	                     
-	    
+	public String updateBook(
+	    @PathVariable Long id,
+	    @Valid @ModelAttribute("bookForm") BookFormDto form,
+	    BindingResult br,
+	    Model model) {
+
+	    if (br.hasErrors()) {
+	        model.addAttribute("book", bookService.getBookById(id));
+	        model.addAttribute("allAuthors", authorService.getAllAuthors());
+	        return "books/form";
+	    }
+
 	    Book saved = bookService.saveBook(id, form);
 	    return "redirect:/books/" + saved.getId();
 	}
+
 
 	@PostMapping("/{id}/delete")
 	public String deleteBook(@PathVariable Long id) {
@@ -155,11 +173,10 @@ public class BookController {
 
 	}
 
-	@PostMapping("/{bookId}/images/{imgId}/delete")
-	public String deleteBookImage(@PathVariable Long bookId, @PathVariable Long imgId) {
-
-		bookService.deleteImage(bookId, imgId);
-		return "redirect:/books/edit/" + bookId;
-
+	@DeleteMapping("/{bookId}/images/{imgId}")
+	@ResponseBody
+	public ResponseEntity<Void> deleteBookImage(@PathVariable Long bookId, @PathVariable Long imgId) {
+	    bookService.deleteImage(bookId, imgId);
+	    return ResponseEntity.ok().build(); 
 	}
 }

@@ -1,6 +1,8 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 public class Credentials {
@@ -9,9 +11,12 @@ public class Credentials {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@NotBlank(message = "L'email è obbligatoria")
 	@Column(unique = true, nullable = false)
 	private String email; 
 
+	@NotBlank(message = "La password è obbligatoria")
+	@Size(min = 6, message = "La password deve avere almeno 6 caratteri")
 	@Column(nullable = false)
 	private String password; 
 

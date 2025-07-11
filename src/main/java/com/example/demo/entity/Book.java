@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "book")
@@ -13,9 +15,11 @@ public class Book {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@NotBlank(message = "Il titolo è obbligatorio")
 	@Column(nullable = false)
 	private String title;
 
+	@NotNull(message = "L’anno di pubblicazione è obbligatorio")
 	@Column(name = "publication_year")
 	private Integer publicationYear;
 

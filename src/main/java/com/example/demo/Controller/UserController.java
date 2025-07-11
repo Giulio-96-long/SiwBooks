@@ -6,13 +6,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.dto.ChangePasswordForm;
 import com.example.demo.dto.UserDto;
-import com.example.demo.serviceImpl.service.ErrorLogService;
 import com.example.demo.serviceImpl.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,12 +35,20 @@ public class UserController {
 	}
 
 	@PostMapping
-	public String updateProfile(UserDto dto, RedirectAttributes ra) {
+	public String updateProfile(
+	    @Valid @ModelAttribute("userDto") UserDto dto,
+	    BindingResult br,
+	    RedirectAttributes ra) {
 
-		userService.updateProfile(dto);
-		ra.addFlashAttribute("success", "Profilo aggiornato!");
-		return "redirect:/profile";
+	    if (br.hasErrors()) {
+	        return "profile/view";
+	    }
+
+	    userService.updateProfile(dto);
+	    ra.addFlashAttribute("success", "Profilo aggiornato!");
+	    return "redirect:/profile";
 	}
+
 
 	@PostMapping("/delete")
 	public String deleteProfile(HttpServletRequest req) {
