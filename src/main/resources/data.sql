@@ -1,7 +1,7 @@
 -- ==============================
--- 4) UTENTI (ID fisso 1–6)
+-- UTENTI 
 -- ==============================
-INSERT INTO `user` (id, first_name, last_name) VALUES
+INSERT INTO `users` (id, first_name, last_name) VALUES
   (1, 'Admin',   'User'),
   (2, 'Regular', 'User'),
   (3, 'Alice',   'Bianchi'),
@@ -10,18 +10,18 @@ INSERT INTO `user` (id, first_name, last_name) VALUES
   (6, 'Dario',   'Blu');
 
 -- ==============================
--- 5) CREDENTIALS
+-- CREDENTIALS
 -- ==============================
 INSERT INTO credentials (email, password, role, user_id) VALUES
-  ('admin.email.it',     '123456', 'ADMIN', 1),
-  ('user.email.it',      '123456', 'USER',  2),
-  ('alice@example.com',  '123456', 'USER',  3),
-  ('bob@example.com',    '123456', 'USER',  4),
-  ('carla@example.com',  '123456', 'USER',  5),
-  ('dario@example.com',  '123456', 'USER',  6);
+  ('admin@email.it',     '$2a$10$4EQxZUJPgVScZEOfHlDKhOfGExqXWQy.3Hjz3SsoaM854zpzNmhMC', 'ADMIN', 1),
+  ('user@email.it',      '$2a$10$4EQxZUJPgVScZEOfHlDKhOfGExqXWQy.3Hjz3SsoaM854zpzNmhMC', 'USER',  2),
+  ('alice@example.com',  '$2a$10$4EQxZUJPgVScZEOfHlDKhOfGExqXWQy.3Hjz3SsoaM854zpzNmhMC', 'USER',  3),
+  ('bob@example.com',    '$2a$10$4EQxZUJPgVScZEOfHlDKhOfGExqXWQy.3Hjz3SsoaM854zpzNmhMC', 'USER',  4),
+  ('carla@example.com',  '$2a$10$4EQxZUJPgVScZEOfHlDKhOfGExqXWQy.3Hjz3SsoaM854zpzNmhMC', 'USER',  5),
+  ('dario@example.com',  '$2a$10$4EQxZUJPgVScZEOfHlDKhOfGExqXWQy.3Hjz3SsoaM854zpzNmhMC', 'USER',  6);
 
 -- ==============================
--- 6) AUTORI REALI
+-- AUTORI REALI
 -- ==============================
 INSERT INTO author (first_name, last_name, birth_date, death_date, nationality, photo, photo_content_type) VALUES
   ('J.K.',           'Rowling',           '1965-07-31', NULL,           'Britannica', NULL, NULL),
@@ -32,7 +32,7 @@ INSERT INTO author (first_name, last_name, birth_date, death_date, nationality, 
   ('Gabriel García', 'Márquez',           '1927-03-06', '2014-04-17',  'Colombiana', NULL, NULL);
 
 -- ==============================
--- 7) LIBRI REALI
+-- LIBRI REALI
 -- ==============================
 INSERT INTO book (title, publication_year) VALUES
   ('Harry Potter and the Philosopher''s Stone', 1997),
@@ -43,7 +43,7 @@ INSERT INTO book (title, publication_year) VALUES
   ('One Hundred Years of Solitude',              1967);
 
 -- ==============================
--- 8) ASSOCIAZIONI LIBRO–AUTORE
+-- ASSOCIAZIONI LIBRO–AUTORE
 -- ==============================
 INSERT INTO book_author (book_id, author_id) VALUES
   (1, 1),  -- Rowling → Harry Potter
@@ -54,7 +54,7 @@ INSERT INTO book_author (book_id, author_id) VALUES
   (6, 6);  -- Márquez → One Hundred Years ...
 
 -- ==============================
--- 9) RECENSIONI DI ESEMPIO
+-- RECENSIONI DI ESEMPIO
 -- ==============================
 INSERT INTO book_review (title, rating, text, created_at, user_id, book_id) VALUES
   -- Harry Potter
