@@ -79,7 +79,7 @@
 			<artifactId>bootstrap-icons</artifactId>
 			<version>1.10.5</version>
 		</dependency>
-		<!--  WebJars locator (per risolvere i percorsi automaticamente)  -->
+		<!--  WebJars locator  -->
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>webjars-locator-core</artifactId>
