@@ -1,13 +1,13 @@
 -- ==============================
 -- UTENTI 
 -- ==============================
-INSERT INTO `users` (id, first_name, last_name) VALUES
-  (1, 'Admin',   'User'),
-  (2, 'Regular', 'User'),
-  (3, 'Alice',   'Bianchi'),
-  (4, 'Bob',     'Verdi'),
-  (5, 'Carla',   'Neri'),
-  (6, 'Dario',   'Blu');
+INSERT INTO `users` ( first_name, last_name) VALUES
+  ('Admin',   'User'),
+  ('Regular', 'User'),
+  ('Alice',   'Bianchi'),
+  ('Bob',     'Verdi'),
+  ('Carla',   'Neri'),
+  ('Dario',   'Blu');
 
 -- ==============================
 -- CREDENTIALS
