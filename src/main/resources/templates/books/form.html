@@ -87,7 +87,7 @@
 				       th:field="*{existingCoverImageId}"
 				       th:value="${img.id}"
 				       class="form-check-input" />
-              <label class="form-check-label">Copertina</label>
+               <label class="form-check-label text-muted small">Scegli come copertina?</label>
             </div>
           </div>
         </div>
@@ -190,20 +190,16 @@
 
         const lbl = document.createElement('label');
         lbl.htmlFor = radio.id;
-        lbl.textContent = 'Copertina';
-        lbl.classList.add('form-check-label', 'ms-1');
-        lbl.style.display = 'none';
+		lbl.textContent = 'Scegli come copertina?';
+		lbl.classList.add('form-check-label', 'ms-1', 'text-muted', 'small');
+		lbl.style.display = 'block';
 
         radio.addEventListener('click', function (e) {
           if (lastNewRadio === this) {
-            this.checked = false;
-            lbl.style.display = 'none';
-            lastNewRadio = null;
-            e.preventDefault();
+			this.checked = false;          
+            lastNewRadio = null;           
           } else {
-            lastNewRadio = this;
-            document.querySelectorAll('label[for^="new-cover-"]').forEach(l => l.style.display = 'none');
-            lbl.style.display = 'inline';
+            lastNewRadio = this;          
 
             // deseleziona eventuale immagine esistente
             const existing = document.querySelector('input[name="existingCoverImageId"]:checked');
@@ -220,9 +216,7 @@
     document.querySelectorAll('input[name="existingCoverImageId"]').forEach(radio => {
       radio.addEventListener('click', () => {
         if (lastNewRadio) {
-          lastNewRadio.checked = false;
-          const lbl = document.querySelector(`label[for="${lastNewRadio.id}"]`);
-          if (lbl) lbl.style.display = 'none';
+          lastNewRadio.checked = false;      
           lastNewRadio = null;
         }
       });
@@ -262,7 +256,7 @@
     for (const file of newFiles) {
       if (file.size > maxSize) {
         alert(`Il file "${file.name}" supera i 2MB consentiti.`);
-        continue; // lo saltiamo
+        continue; 
       }
 
       if (!currentFiles.some(f => f.name === file.name && f.size === file.size)) {

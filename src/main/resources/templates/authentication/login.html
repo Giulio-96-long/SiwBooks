@@ -2,11 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      layout:decorate="~{layout}">
-	  
-<head>
-	<title layout:fragment="title">Login</title>
-</head>
+      layout:decorate="~{layout}",
+	  th:with="title='Login'">
 
 <body>
 	<div layout:fragment="content" class="d-flex justify-content-center align-items-center" style="min-height:80vh;">
