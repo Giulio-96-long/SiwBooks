@@ -1,18 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	layout:decorate="~{layout}" th:with="title=${author.id} == null ? 'Nuovo Autore' : 'Modifica Autore'">
-<div layout:fragment="content" class="container">
+
+	<div layout:fragment="content" class="container">
 	<div class="card h-100 border p-3">
 		<h1 th:text="${author.id} == null ? 'Nuovo Autore' : 'Modifica Autore'"></h1>
 
 		<form th:action="${author.id} == null ? @{/authors} : @{/authors/edit/{id}(id=${author.id})}"
-			th:object="${author}" method="post" enctype="multipart/form-data">
-
-			<div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
-				<ul>
-					<li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
-				</ul>
-			</div>
+			th:object="${author}" method="post" enctype="multipart/form-data">			
 
 			<div class="mb-3">
 				<label class="form-label">Nome</label>
@@ -109,6 +104,18 @@
 
 			if (removeBtn) {
 				removeBtn.addEventListener('click', resetPreview);
+			}
+		});
+		
+		const maxSize = 2 * 1024 * 1024; 
+
+		fileInput.addEventListener('change', () => {
+			const file = fileInput.files[0];
+			if (file && file.size > maxSize) {
+				alert('La foto supera la dimensione massima consentita (2MB).');
+				fileInput.value = '';
+				resetPreview();
+				return;
 			}
 		});
 	   /*]]>*/

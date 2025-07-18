@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}">
+      layout:decorate="~{layout}"
+	  th:with="title=${bookForm.id == null or bookForm.id == 0 ? 'Nuovo Libro' : 'Modifica Libro'}">>
 
 <div layout:fragment="content">
   <div class="card h-100 border p-3">
@@ -13,13 +14,7 @@
     <form th:object="${bookForm}"
           th:action="${bookForm.id == null or bookForm.id == 0} ? @{/books/new} : @{/books/edit/{id}(id=${bookForm.id})}"
           method="post"
-          enctype="multipart/form-data">
-		  
-		  <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
-		    <ul>
-		      <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
-		    </ul>
-		  </div>
+          enctype="multipart/form-data">	  
 		  
       <input type="hidden" th:field="*{id}" />
 
@@ -54,6 +49,7 @@
       <div class="mb-3">
         <label class="form-label">Seleziona Immagini</label>
         <input type="file"
+			   accept="image/*"
                id="imagesInput"
                name="images"
                multiple
@@ -257,6 +253,25 @@
       alert('Errore di rete durante l\'eliminazione.');
     });
   };
+  
+  const maxSize = 2 * 1024 * 1024; // 2MB
+
+  input.addEventListener('change', () => {
+    const newFiles = Array.from(input.files);
+
+    for (const file of newFiles) {
+      if (file.size > maxSize) {
+        alert(`Il file "${file.name}" supera i 2MB consentiti.`);
+        continue; // lo saltiamo
+      }
+
+      if (!currentFiles.some(f => f.name === file.name && f.size === file.size)) {
+        currentFiles.push(file);
+      }
+    }
+
+    renderPreviews();
+  });
 
   /*]]>*/
   </script>

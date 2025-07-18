@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout}">
-
-<head>
-	<title layout:fragment="title">Elenco Autori</title>
-</head>
+	layout:decorate="~{layout}"  th:with="title='Elenco Autori'">>
 
 <div layout:fragment="content">
 	<div class="card h-100 border p-3">
@@ -156,7 +152,7 @@
 		</nav>
 		
 		<div th:if="${authorsPage.totalElements == 0}" class="alert alert-warning mt-4">
-			Nessun autore trovato con i criteri specificati.
+			Nessun autore presente.
 		</div>
 
 		<!-- BACK TO TOP -->

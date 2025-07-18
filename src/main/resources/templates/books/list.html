@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout}">
+	layout:decorate="~{layout}"  th:with="title='Elenco Libri'">>
 
 <div layout:fragment="content">
 	<div class="card h-100 border p-3">
@@ -112,7 +112,7 @@
 		</nav>
 		
 		<div th:if="${booksPage.totalElements == 0}" class="alert alert-warning mt-4">
-			Nessun libro trovato con i criteri specificati.
+			Nessun libro presente.
 		</div>
 
 		<!-- BACK TO TOP -->

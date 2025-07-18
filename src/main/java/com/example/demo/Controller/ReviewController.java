@@ -85,7 +85,7 @@ public class ReviewController {
 	    Model model) {
 
 	    if (br.hasErrors()) {
-	        return "redirect:/books/" + bookId; // meglio se ricarichi la pagina con errori
+	        return "redirect:/books/" + bookId; 
 	    }
 
 	    reviewService.updateReview(reviewId, reviewForm);
