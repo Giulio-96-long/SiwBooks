@@ -112,7 +112,7 @@
 
 
 		<!-- PAGINAZIONE -->
-		<nav aria-label="Page navigation" class="mt-4">
+		<nav aria-label="Page navigation" class="mt-4" th:if="${authorsPage.totalPages > 0}">
 			<ul class="pagination justify-content-center">
 				<!-- Prev -->
 				<li class="page-item" th:classappend="${authorsPage.first} ? 'disabled'">
@@ -154,6 +154,10 @@
 				</li>
 			</ul>
 		</nav>
+		
+		<div th:if="${authorsPage.totalElements == 0}" class="alert alert-warning mt-4">
+			Nessun autore trovato con i criteri specificati.
+		</div>
 
 		<!-- BACK TO TOP -->
 		<button id="backToTop" class="btn btn-secondary"

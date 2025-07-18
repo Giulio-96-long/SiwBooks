@@ -47,11 +47,20 @@ public class AuthenticationController {
 	@PostMapping("/register")
 	public String doRegister(
 	    @Valid @ModelAttribute("registration") RegisterRequestDto dto,
-	    BindingResult br) {
+	    BindingResult br,
+	    Model model) {
+
 	    if (br.hasErrors()) {
 	        return "authentication/register";
 	    }
-	    userService.register(dto);
+
+	    try {
+	        userService.register(dto);
+	    } catch (IllegalArgumentException e) {	     
+	        br.rejectValue("email", "error.registration", e.getMessage());
+	        return "authentication/register";
+	    }
+
 	    return "redirect:/login";
 	}
 

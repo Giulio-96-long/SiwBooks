@@ -163,15 +163,10 @@
 					</form>
 				</td>
 			</tr>
-			<tr th:if="${#lists.isEmpty(reviewsPage.content)}">
-				<td colspan="6" class="text-center text-muted">
-					Nessuna recensione trovata.
-				</td>
-			</tr>
 		</tbody>
 	</table>
 
-	<nav>
+	<nav aria-label="Page navigation" class="mt-4" th:if="${reviewsPage.totalPages > 0}">
 		<ul class="pagination justify-content-center">
 			<!-- Prev -->
 			<li class="page-item" th:classappend="${reviewsPage.first} ? 'disabled'">
@@ -206,6 +201,11 @@
 			</li>
 		</ul>
 	</nav>
+	
+	<div th:if="${reviewsPage.totalElements == 0}" class="alert alert-warning mt-4">
+			Nessuna recensione trovato con i criteri specificati.
+	</div>
+
 
 	<!--MODAL PER OGNI RECENSIONE-->
 	<div th:each="r : ${reviewsPage.content}">

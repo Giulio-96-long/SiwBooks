@@ -80,36 +80,40 @@
 		</div>
 
 		<!-- PAGINAZIONE -->
-		<nav class="mt-4" aria-label="Page navigation">
+		<nav class="mt-4" aria-label="Page navigation" th:if="${booksPage.totalPages > 0}">
 			<ul class="pagination justify-content-center">
 				<li class="page-item" th:classappend="${booksPage.first} ? 'disabled'">
 					<a class="page-link" th:href="@{/books(page=${booksPage.number-1},
-                               title=${title},
-                               year=${year},
-                               sortField=${sortField},
-                               sortDir=${sortDir})}">
+										   title=${title},
+										   year=${year},
+										   sortField=${sortField},
+										   sortDir=${sortDir})}">
 						«
 					</a>
 				</li>
 				<li class="page-item" th:each="i : ${#numbers.sequence(0, booksPage.totalPages-1)}"
 					th:classappend="${i == booksPage.number} ? 'active'">
 					<a class="page-link" th:href="@{/books(page=${i},
-                               title=${title},
-                               year=${year},
-                               sortField=${sortField},
-                               sortDir=${sortDir})}" th:text="${i+1}">1</a>
+										   title=${title},
+										   year=${year},
+										   sortField=${sortField},
+										   sortDir=${sortDir})}" th:text="${i+1}">1</a>
 				</li>
 				<li class="page-item" th:classappend="${booksPage.last} ? 'disabled'">
 					<a class="page-link" th:href="@{/books(page=${booksPage.number+1},
-                               title=${title},
-                               year=${year},
-                               sortField=${sortField},
-                               sortDir=${sortDir})}">
+										   title=${title},
+										   year=${year},
+										   sortField=${sortField},
+										   sortDir=${sortDir})}">
 						»
 					</a>
 				</li>
 			</ul>
 		</nav>
+		
+		<div th:if="${booksPage.totalElements == 0}" class="alert alert-warning mt-4">
+			Nessun libro trovato con i criteri specificati.
+		</div>
 
 		<!-- BACK TO TOP -->
 		<button id="backToTop" class="btn btn-secondary"
