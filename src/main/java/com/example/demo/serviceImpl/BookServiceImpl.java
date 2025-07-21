@@ -50,7 +50,7 @@ public class BookServiceImpl implements BookService {
 	@Override
 	@Transactional
 	public Book saveBook(Long id, BookFormDto form) {
-	    // autorizzazioni e caricamento/creazione (resta identico)
+	    // autorizzazioni e caricamento/creazione 
 	    Credentials me = credentialsService.getCurrentCredentials();
 	    if (!"ADMIN".equals(me.getRole())) {
 	        throw new AccessDeniedException("Solo ADMIN possono modificare libri");
@@ -58,13 +58,13 @@ public class BookServiceImpl implements BookService {
 	    Book book = (id == null || id == 0L) ? new Book() : getBookById(id);
 	    book.setTitle(form.getTitle());
 	    book.setPublicationYear(form.getPublicationYear());
-	    // autori (idem)
+	    // autori 
 	    List<Author> authors = authorService.getAllAuthors().stream()
 	        .filter(a -> form.getAuthorIds().contains(a.getId()))
 	        .collect(Collectors.toList());
 	    book.setAuthors(authors);
 
-	    // **1. Carico le nuove immagini e le metto in una lista temporanea**
+	    // Carico le nuove immagini e le metto in una lista temporanea
 	    List<BookImage> newlyAdded = new ArrayList<>();
 	    for (MultipartFile file : form.getImages()) {
 	        if (file.isEmpty()) continue;
@@ -77,21 +77,21 @@ public class BookServiceImpl implements BookService {
 	        }
 	        img.setContentType(file.getContentType());
 	        img.setCover(false);
-	        book.getImages().add(img);      // viene aggiunta nella collection di Book
-	        newlyAdded.add(img);            // ma la salvo anche qui
+	        book.getImages().add(img);    
+	        newlyAdded.add(img);            
 	    }
 
-	    // **2. Resetto tutte le cover**
+	    //  Resetto tutte le cover
 	    book.getImages().forEach(i -> i.setCover(false));
 
-	    // **3. Se ho scelto una nuova cover, la cerco nella lista newlyAdded**
+	    // Se ho scelto una nuova cover, la cerco nella lista newlyAdded
 	    if (form.getNewCoverIndex() != null) {
 	        int idx = form.getNewCoverIndex();
 	        if (idx >= 0 && idx < newlyAdded.size()) {
 	            newlyAdded.get(idx).setCover(true);
 	        }
 	    }
-	    // **4. Altrimenti consideriamo la cover preesistente**
+	    //  Altrimenti consideriamo la cover preesistente
 	    else if (form.getExistingCoverImageId() != null) {
 	        Long existingId = form.getExistingCoverImageId();
 	        book.getImages().stream()
@@ -100,7 +100,7 @@ public class BookServiceImpl implements BookService {
 	            .ifPresent(i -> i.setCover(true));
 	    }
 
-	    // **5. Salvo tutto in un colpo solo**
+	    //  Salvo tutto in un colpo solo
 	    return bookRepo.save(book);
 	}
 
