@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.dto.BookFormDto;
@@ -47,8 +48,9 @@ public class BookServiceImpl implements BookService {
 	private ErrorLogService errorLogService;
 
 	@Override
+	@Transactional
 	public Book saveBook(Long id, BookFormDto form) {
-	    // autorizzazioni, caricamento o creazione
+	    // autorizzazioni e caricamento/creazione (resta identico)
 	    Credentials me = credentialsService.getCurrentCredentials();
 	    if (!"ADMIN".equals(me.getRole())) {
 	        throw new AccessDeniedException("Solo ADMIN possono modificare libri");
@@ -56,21 +58,18 @@ public class BookServiceImpl implements BookService {
 	    Book book = (id == null || id == 0L) ? new Book() : getBookById(id);
 	    book.setTitle(form.getTitle());
 	    book.setPublicationYear(form.getPublicationYear());
-	    // autori
+	    // autori (idem)
 	    List<Author> authors = authorService.getAllAuthors().stream()
 	        .filter(a -> form.getAuthorIds().contains(a.getId()))
 	        .collect(Collectors.toList());
 	    book.setAuthors(authors);
-	    // salvo libro base per ottenere ID
-	    Book saved = bookRepo.save(book);
 
-	    // upload nuove immagini
+	    // **1. Carico le nuove immagini e le metto in una lista temporanea**
 	    List<BookImage> newlyAdded = new ArrayList<>();
-	    for (int i = 0; i < form.getImages().size(); i++) {
-	        MultipartFile file = form.getImages().get(i);
+	    for (MultipartFile file : form.getImages()) {
 	        if (file.isEmpty()) continue;
 	        BookImage img = new BookImage();
-	        img.setBook(saved);
+	        img.setBook(book);
 	        try {
 	            img.setImage(file.getBytes());
 	        } catch (IOException e) {
@@ -78,35 +77,32 @@ public class BookServiceImpl implements BookService {
 	        }
 	        img.setContentType(file.getContentType());
 	        img.setCover(false);
-	        saved.getImages().add(img);
-	        newlyAdded.add(img);
+	        book.getImages().add(img);      // viene aggiunta nella collection di Book
+	        newlyAdded.add(img);            // ma la salvo anche qui
 	    }
-	    // salvo con le nuove immagini montate
-	    saved = bookRepo.save(saved);
 
-	    // prima cancello ogni cover precedente
-	    saved.getImages().forEach(img -> img.setCover(false));
+	    // **2. Resetto tutte le cover**
+	    book.getImages().forEach(i -> i.setCover(false));
 
-	    // se ho scelto una nuova cover:
+	    // **3. Se ho scelto una nuova cover, la cerco nella lista newlyAdded**
 	    if (form.getNewCoverIndex() != null) {
 	        int idx = form.getNewCoverIndex();
 	        if (idx >= 0 && idx < newlyAdded.size()) {
 	            newlyAdded.get(idx).setCover(true);
 	        }
 	    }
-	    // altrimenti se ho selezionato una cover esistente:
+	    // **4. Altrimenti consideriamo la cover preesistente**
 	    else if (form.getExistingCoverImageId() != null) {
 	        Long existingId = form.getExistingCoverImageId();
-	        saved.getImages().stream()
-	             .filter(img -> img.getId().equals(existingId))
-	             .findFirst()
-	             .ifPresent(img -> img.setCover(true));
+	        book.getImages().stream()
+	            .filter(i -> existingId.equals(i.getId()))
+	            .findFirst()
+	            .ifPresent(i -> i.setCover(true));
 	    }
 
-	    // infine salvo lo stato "cover" sugli oggetti
-	    return bookRepo.save(saved);
+	    // **5. Salvo tutto in un colpo solo**
+	    return bookRepo.save(book);
 	}
-
 
 	@Override
 	public Book getBookById(Long id) {
