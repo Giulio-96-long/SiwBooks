@@ -1,275 +1,275 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout}"
-	  th:with="title=${bookForm.id == null or bookForm.id == 0 ? 'Nuovo Libro' : 'Modifica Libro'}">>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}"
+	th:with="title=${bookForm.id == null or bookForm.id == 0 ? 'Nuovo Libro' : 'Modifica Libro'}">
 
 <div layout:fragment="content">
-  <div class="card h-100 border p-3">
+	<div class="card h-100 border p-3">
 
-    <!-- Titolo pagina -->
-    <h1 th:text="${bookForm.id == null or bookForm.id == 0 ? 'Nuovo Libro' : 'Modifica Libro'}"></h1>
+		<!-- Titolo pagina -->
+		<h1 th:text="${bookForm.id == null or bookForm.id == 0 ? 'Nuovo Libro' : 'Modifica Libro'}"></h1>
 
-    <!-- FORM UNIFICATO PER NEW ED EDIT -->
-    <form th:object="${bookForm}"
-          th:action="${bookForm.id == null or bookForm.id == 0} ? @{/books/new} : @{/books/edit/{id}(id=${bookForm.id})}"
-          method="post"
-          enctype="multipart/form-data">	  
-		  
-      <input type="hidden" th:field="*{id}" />
+		<!-- FORM UNIFICATO PER NEW ED EDIT -->
+		<form th:object="${bookForm}"
+			th:action="${bookForm.id == null or bookForm.id == 0} ? @{/books/new} : @{/books/edit/{id}(id=${bookForm.id})}"
+			method="post" enctype="multipart/form-data">
 
-      <!-- Campi base -->
-      <div class="mb-3">
-        <label class="form-label">Titolo</label>
-        <input type="text" th:field="*{title}" class="form-control" required />
-		<div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Anno Pubblicazione</label>
-        <input type="number" th:field="*{publicationYear}" class="form-control" required />
-		<div class="text-danger" th:if="${#fields.hasErrors('publicationYear')}" th:errors="*{publicationYear}"></div>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Autori</label>
-        <div class="d-flex flex-wrap">
-          <div th:each="aut : ${allAuthors}" class="form-check me-3 mb-2">
-            <input type="checkbox"
-                   class="form-check-input"
-                   th:field="*{authorIds}"
-                   th:value="${aut.id}"
-                   th:id="${'chk-aut-' + aut.id}" />
-            <label class="form-check-label"
-                   th:for="${'chk-aut-' + aut.id}"
-                   th:text="${aut.firstName + ' ' + aut.lastName}"></label>
-          </div>
-        </div>
-      </div>
+			<input type="hidden" th:field="*{id}" />
 
-      <!-- Selezione nuove immagini -->
-      <div class="mb-3">
-        <label class="form-label">Seleziona Immagini</label>
-        <input type="file"
-			   accept="image/*"
-               id="imagesInput"
-               name="images"
-               multiple
-               class="form-control" />
-        <small class="form-text text-muted">Anteprima e seleziona copertina dalle nuove.</small>
-      </div>
+			<!-- Campi base -->
+			<div class="mb-3">
+				<label class="form-label">Titolo</label>
+				<input type="text" th:field="*{title}" class="form-control" required />
+				<div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Anno Pubblicazione</label>
+				<input type="number" th:field="*{publicationYear}" class="form-control" required />
+				<div class="text-danger" th:if="${#fields.hasErrors('publicationYear')}" th:errors="*{publicationYear}">
+				</div>
+			</div>
 
-      <!-- Anteprima nuove immagini -->
-      <div class="mb-3">
-        <div id="previewContainer" class="d-flex flex-wrap gap-2"></div>
-      </div>
-      <div class="mb-3" id="coverOptions"></div>
+			<div class="mb-3">
+				<label class="form-label">Autori</label>
 
-      <!-- Immagini già caricate -->
-      <div class="mt-4" th:if="${book != null and not #lists.isEmpty(book.images)}">
-        <p>Immagini già caricate:</p>
-        <div class="d-flex flex-wrap">
-          <div th:each="img : ${book.images}"
-               class="position-relative me-2 mb-2"
-               style="width:100px;">
-            <img th:src="@{/books/{b}/images/{i}(b=${book.id},i=${img.id})}"
-                 class="img-thumbnail"
-                 style="width:100%;height:100px;object-fit:cover;" />
+				<!-- Campo di ricerca + pulsanti -->
+				<div class="input-group mb-2">
+					<input type="text" id="authorFilter" class="form-control" placeholder="Filtra autori...">
+					<button class="btn btn-outline-primary" type="button" id="filterBtn">Cerca</button>
+					<button class="btn btn-outline-secondary" type="button" id="resetBtn">Reset</button>
+				</div>
 
-				 <div class="position-absolute top-0 end-0 p-1">
-				   <button type="button"
-				           class="btn btn-sm btn-danger"
-				           th:onclick="'submitImageDelete(' + ${book.id} + ',' + ${img.id} + ')'">
-				     <i class="bi bi-trash"></i>
-				   </button>
-				 </div>
+				<!-- Lista di checkbox scrollabile -->
+				<div class="mb-3">
+					<label class="form-label">Autori</label>
 
-            <div class="form-check mt-1 text-center">
-				<input type="radio"
-				       th:field="*{existingCoverImageId}"
-				       th:value="${img.id}"
-				       class="form-check-input" />
-               <label class="form-check-label text-muted small">Scegli come copertina?</label>
-            </div>
-          </div>
-        </div>
-      </div>
+					<!-- Lista con scroll -->
+					<div class="d-flex flex-wrap border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+						<div th:each="aut : ${allAuthors}" class="form-check me-3 mb-2">
+							<input type="checkbox" class="form-check-input" th:field="*{authorIds}" th:value="${aut.id}"
+								th:id="${'chk-aut-' + aut.id}" />
+							<label class="form-check-label" th:for="${'chk-aut-' + aut.id}"
+								th:text="${aut.firstName + ' ' + aut.lastName}"></label>
+						</div>
+					</div>
+				</div>
 
-      <!-- Salva / Annulla -->
-      <button type="submit" class="btn btn-primary" th:text="${bookForm.id == null or bookForm.id == 0 ? 'Crea' : 'Salva'}"></button>
-      <a th:href="@{/books}" class="btn btn-secondary ms-2">Annulla</a>
-    </form>
+				<!-- Selezione nuove immagini -->
+				<div class="mb-3">
+					<label class="form-label">Seleziona Immagini</label>
+					<input type="file" accept="image/*" id="imagesInput" name="images" multiple class="form-control" />
+					<small class="form-text text-muted">Anteprima e seleziona copertina dalle nuove.</small>
+				</div>
 
-  </div>
+				<!-- Anteprima nuove immagini -->
+				<div class="mb-3">
+					<div id="previewContainer" class="d-flex flex-wrap gap-2"></div>
+				</div>
+				<div class="mb-3" id="coverOptions"></div>
 
-  <!-- SCRIPT PREVIEW & COVER -->
-  <script th:inline="javascript">
-  /*<![CDATA[*/
-  document.addEventListener('DOMContentLoaded', () => {
-    const input      = document.getElementById('imagesInput');
-    const preview    = document.getElementById('previewContainer');
-    const coverOpts  = document.getElementById('coverOptions');
+				<!-- Immagini già caricate -->
+				<div class="mt-4" th:if="${book != null and not #lists.isEmpty(book.images)}">
+					<p>Immagini già caricate:</p>
+					<div class="d-flex flex-wrap">
+						<div th:each="img : ${book.images}" class="position-relative me-2 mb-2" style="width:100px;">
+							<img th:src="@{/books/{b}/images/{i}(b=${book.id},i=${img.id})}" class="img-thumbnail"
+								style="width:100%;height:100px;object-fit:cover;" />
 
-    if (!input || !preview || !coverOpts) return;
+							<div class="position-absolute top-0 end-0 p-1">
+								<button type="button" class="btn btn-sm btn-danger"
+									th:onclick="'submitImageDelete(' + ${book.id} + ',' + ${img.id} + ')'">
+									<i class="bi bi-trash"></i>
+								</button>
+							</div>
 
-    let currentFiles = [];
-    let lastNewRadio = null;
+							<div class="form-check mt-1 text-center">
+								<input type="radio" th:field="*{existingCoverImageId}" th:value="${img.id}"
+									class="form-check-input" />
+								<label class="form-check-label text-muted small">Scegli come copertina?</label>
+							</div>
+						</div>
+					</div>
+				</div>
 
-    input.addEventListener('change', () => {
-      const newFiles = Array.from(input.files);
+				<!-- Salva / Annulla -->
+				<button type="submit" class="btn btn-primary"
+					th:text="${bookForm.id == null or bookForm.id == 0 ? 'Crea' : 'Salva'}"></button>
+				<a th:href="@{/books}" class="btn btn-secondary ms-2">Annulla</a>
+		</form>
 
-      for (const file of newFiles) {
-        if (!currentFiles.some(f => f.name === file.name && f.size === file.size)) {
-          currentFiles.push(file);
-        }
-      }
+	</div>
 
-      renderPreviews();
-    });
+	<!-- SCRIPT PREVIEW & COVER -->
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		document.addEventListener('DOMContentLoaded', () => {
+			const input = document.getElementById('imagesInput');
+			const preview = document.getElementById('previewContainer');
+			const coverOpts = document.getElementById('coverOptions');
 
-    function renderPreviews() {
-      const transfer = new DataTransfer();
-      currentFiles.forEach(file => transfer.items.add(file));
-      input.files = transfer.files;
+			if (!input || !preview || !coverOpts) return;
 
-      preview.innerHTML = '';
-      coverOpts.innerHTML = '';
+			let currentFiles = [];
+			let lastNewRadio = null;
 
-      currentFiles.forEach((file, idx) => {
-        const url = URL.createObjectURL(file);
+			input.addEventListener('change', () => {
+				const newFiles = Array.from(input.files);
 
-        const wrap = document.createElement('div');
-        wrap.style.cssText = 'position:relative;display:inline-block;margin:0.25rem;width:100px;height:100px;';
+				for (const file of newFiles) {
+					if (!currentFiles.some(f => f.name === file.name && f.size === file.size)) {
+						currentFiles.push(file);
+					}
+				}
 
-        const img = document.createElement('img');
-        img.src = url;
-        img.onload = () => URL.revokeObjectURL(url);
-        img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-        img.classList.add('img-thumbnail');
-        wrap.appendChild(img);
+				renderPreviews();
+			});
 
-        // bottone X
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.textContent = '×';
-        Object.assign(btn.style, {
-          position: 'absolute',
-          top: '0',
-          right: '0',
-          background: 'rgba(255,255,255,0.8)',
-          border: 'none',
-          color: 'red',
-          fontSize: '1.4rem',
-          lineHeight: '1',
-          padding: '0',
-          cursor: 'pointer',
-          zIndex: '10'
-        });
-        btn.title = 'Rimuovi';
+			function renderPreviews() {
+				const transfer = new DataTransfer();
+				currentFiles.forEach(file => transfer.items.add(file));
+				input.files = transfer.files;
 
-        btn.addEventListener('click', () => {
-          const removedFile = currentFiles[idx];
-          currentFiles = currentFiles.filter(f => f !== removedFile);
-          if (lastNewRadio && lastNewRadio.value == idx.toString()) {
-            lastNewRadio = null;
-          }
-          renderPreviews();
-        });
+				preview.innerHTML = '';
+				coverOpts.innerHTML = '';
 
-        wrap.appendChild(btn);
-        preview.appendChild(wrap);
+				currentFiles.forEach((file, idx) => {
+					const url = URL.createObjectURL(file);
 
-        // radio copertina (una sola tra nuove e vecchie)
-        const radioWrap = document.createElement('div');
-        radioWrap.classList.add('form-check', 'mt-1');
+					const wrap = document.createElement('div');
+					wrap.style.cssText = 'position:relative;display:inline-block;margin:0.25rem;width:100px;height:100px;';
 
-        const radio = document.createElement('input');
-        radio.type = 'radio';
-        radio.name = 'newCoverIndex';
-        radio.value = idx;
-        radio.id = `new-cover-${idx}`;
-        radio.classList.add('form-check-input');
+					const img = document.createElement('img');
+					img.src = url;
+					img.onload = () => URL.revokeObjectURL(url);
+					img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+					img.classList.add('img-thumbnail');
+					wrap.appendChild(img);
 
-        const lbl = document.createElement('label');
-        lbl.htmlFor = radio.id;
-		lbl.textContent = 'Scegli come copertina?';
-		lbl.classList.add('form-check-label', 'ms-1', 'text-muted', 'small');
-		lbl.style.display = 'block';
+					// bottone X
+					const btn = document.createElement('button');
+					btn.type = 'button';
+					btn.textContent = '×';
+					Object.assign(btn.style, {
+						position: 'absolute',
+						top: '0',
+						right: '0',
+						background: 'rgba(255,255,255,0.8)',
+						border: 'none',
+						color: 'red',
+						fontSize: '1.4rem',
+						lineHeight: '1',
+						padding: '0',
+						cursor: 'pointer',
+						zIndex: '10'
+					});
+					btn.title = 'Rimuovi';
 
-        radio.addEventListener('click', function (e) {
-          if (lastNewRadio === this) {
-			this.checked = false;          
-            lastNewRadio = null;           
-          } else {
-            lastNewRadio = this;          
+					btn.addEventListener('click', () => {
+						const removedFile = currentFiles[idx];
+						currentFiles = currentFiles.filter(f => f !== removedFile);
+						if (lastNewRadio && lastNewRadio.value == idx.toString()) {
+							lastNewRadio = null;
+						}
+						renderPreviews();
+					});
 
-            // deseleziona eventuale immagine esistente
-            const existing = document.querySelector('input[name="existingCoverImageId"]:checked');
-            if (existing) existing.checked = false;
-          }
-        });
+					wrap.appendChild(btn);
+					preview.appendChild(wrap);
 
-        radioWrap.append(radio, lbl);
-        coverOpts.appendChild(radioWrap);
-      });
-    }
+					// radio copertina (una sola tra nuove e vecchie)
+					const radioWrap = document.createElement('div');
+					radioWrap.classList.add('form-check', 'mt-1');
 
-    // disattiva la radio tra le nuove se seleziono una esistente
-    document.querySelectorAll('input[name="existingCoverImageId"]').forEach(radio => {
-      radio.addEventListener('click', () => {
-        if (lastNewRadio) {
-          lastNewRadio.checked = false;      
-          lastNewRadio = null;
-        }
-      });
-    });
-  });
-  
-  window.submitImageDelete = function(bookId, imageId) {
-    if (!confirm('Vuoi davvero eliminare questa immagine?')) return;
+					const radio = document.createElement('input');
+					radio.type = 'radio';
+					radio.name = 'newCoverIndex';
+					radio.value = idx;
+					radio.id = `new-cover-${idx}`;
+					radio.classList.add('form-check-input');
 
-    fetch(`/books/${bookId}/images/${imageId}`, {
-      method: 'DELETE',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-    .then(response => {
-      if (response.ok) {
-        // rimuove il div che contiene l'immagine eliminata
-        const button = document.querySelector(`button[onclick="submitImageDelete(${bookId},${imageId})"]`);
-        const container = button?.closest('.position-relative');
-        if (container) container.remove();
-      } else {
-        alert('Errore durante l\'eliminazione dell\'immagine.');
-      }
-    })
-    .catch(err => {
-      console.error('Errore durante la richiesta DELETE:', err);
-      alert('Errore di rete durante l\'eliminazione.');
-    });
-  };
-  
-  const maxSize = 2 * 1024 * 1024; // 2MB
+					const lbl = document.createElement('label');
+					lbl.htmlFor = radio.id;
+					lbl.textContent = 'Scegli come copertina?';
+					lbl.classList.add('form-check-label', 'ms-1', 'text-muted', 'small');
+					lbl.style.display = 'block';
 
-  input.addEventListener('change', () => {
-    const newFiles = Array.from(input.files);
+					radio.addEventListener('click', function (e) {
+						if (lastNewRadio === this) {
+							this.checked = false;
+							lastNewRadio = null;
+						} else {
+							lastNewRadio = this;
 
-    for (const file of newFiles) {
-      if (file.size > maxSize) {
-        alert(`Il file "${file.name}" supera i 2MB consentiti.`);
-        continue; 
-      }
+							// deseleziona eventuale immagine esistente
+							const existing = document.querySelector('input[name="existingCoverImageId"]:checked');
+							if (existing) existing.checked = false;
+						}
+					});
 
-      if (!currentFiles.some(f => f.name === file.name && f.size === file.size)) {
-        currentFiles.push(file);
-      }
-    }
+					radioWrap.append(radio, lbl);
+					coverOpts.appendChild(radioWrap);
+				});
+			}
 
-    renderPreviews();
-  });
+			// disattiva la radio tra le nuove se seleziono una esistente
+			document.querySelectorAll('input[name="existingCoverImageId"]').forEach(radio => {
+				radio.addEventListener('click', () => {
+					if (lastNewRadio) {
+						lastNewRadio.checked = false;
+						lastNewRadio = null;
+					}
+				});
+			});
+		});
 
-  /*]]>*/
-  </script>
+		window.submitImageDelete = function (bookId, imageId) {
+			if (!confirm('Vuoi davvero eliminare questa immagine?')) return;
+
+			fetch(`/books/${bookId}/images/${imageId}`, {
+				method: 'DELETE',
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest'
+				}
+			})
+				.then(response => {
+					if (response.ok) {
+						// rimuove il div che contiene l'immagine eliminata
+						const button = document.querySelector(`button[onclick="submitImageDelete(${bookId},${imageId})"]`);
+						const container = button?.closest('.position-relative');
+						if (container) container.remove();
+					} else {
+						alert('Errore durante l\'eliminazione dell\'immagine.');
+					}
+				})
+				.catch(err => {
+					console.error('Errore durante la richiesta DELETE:', err);
+					alert('Errore di rete durante l\'eliminazione.');
+				});
+		};
+
+		const maxSize = 2 * 1024 * 1024; // 2MB
+
+		input.addEventListener('change', () => {
+			const newFiles = Array.from(input.files);
+
+			for (const file of newFiles) {
+				if (file.size > maxSize) {
+					alert(`Il file "${file.name}" supera i 2MB consentiti.`);
+					continue;
+				}
+
+				if (!currentFiles.some(f => f.name === file.name && f.size === file.size)) {
+					currentFiles.push(file);
+				}
+			}
+
+			renderPreviews();
+		});
+
+		/*]]>*/
+	</script>
 
 
 </div>
+
 </html>
