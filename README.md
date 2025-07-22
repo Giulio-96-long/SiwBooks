@@ -16,10 +16,8 @@ Progetto sviluppato con **Spring Boot**, **MySQL**, **Google OAuth2** e interfac
 
 ## Configurazione locale
 
-1. Crea un database MySQL:
-   ```sql
-   CREATE DATABASE siwbooks;
-   ```
+1. Crea un database MySQL : siwbooks.
+
 
 2. Copia il file di esempio:
    ```bash
@@ -34,7 +32,9 @@ Progetto sviluppato con **Spring Boot**, **MySQL**, **Google OAuth2** e interfac
    ```properties
    spring.sql.init.mode=always
    ```
- Dopo il primo avvio, **commentala** o impostala su `never` per evitare duplicazioni.
+ Dopo il primo avvio, **commentala** o impostala su `never` per evitare errori.
+
+ 5. Per il login la password per ogni utente e admin è 123456.
 
 ---
 

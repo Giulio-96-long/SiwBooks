@@ -58,8 +58,7 @@
 		<div class="row g-4">
 			<div class="col-sm-6 col-md-4 col-lg-3" th:each="author : ${authorsPage.content}">
 				<div class="card h-100">
-
-					<!-- FOTO IN RATIO 4:3 -->
+					
 					<div class="ratio ratio-4x3">
 						<img th:if="${author.photo != null}" th:src="@{/authors/{id}/photo(id=${author.id})}"
 							class="card-img-top object-fit-cover"

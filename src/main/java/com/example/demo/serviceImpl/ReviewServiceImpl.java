@@ -130,7 +130,7 @@ public class ReviewServiceImpl implements ReviewService {
 
 	@Override
 	public List<RatingCountResponseDto> getRatingCounts(Long bookId) {
-		// ma dobbiamo assicurarci che ci siano sempre 5→1
+	
 		Map<Integer, Long> map = reviewRepo.findRatingCountsByBook(bookId).stream()
 				.collect(Collectors.toMap(RatingCountResponseDto::getRating, RatingCountResponseDto::getCount));
 

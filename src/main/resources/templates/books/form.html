@@ -107,7 +107,7 @@
 	  const maxSize = 2 * 1024 * 1024; // 2MB
 	  let currentFiles = [];
 
-	  // 1) Quando aggiungo file
+	  // Quando aggiungo file
 	  input.addEventListener('change', () => {
 	    const files = Array.from(input.files)
 	      .filter(f => f.size <= maxSize
@@ -117,7 +117,7 @@
 	    renderPreviews();
 	  });
 
-	  // 2) Funzione che ricrea thumbnails + select
+	  // Funzione che ricrea thumbnails + select
 	  function renderPreviews() {
 	    // aggiorno input.files
 	    const dt = new DataTransfer();
@@ -165,14 +165,14 @@
 	    });
 	  }
 
-	  // 3) Se cambio select, deseleziono i radio esistenti
+	  //  Se cambio select, deseleziono i radio esistenti
 	  select.addEventListener('change', () => {
 	    if (select.value !== '') {
 	      existingRadios.forEach(r => r.checked = false);
 	    }
 	  });
 
-	  // 4) Se cambio radio esistente, resetto select
+	  //  Se cambio radio esistente, resetto select
 	  existingRadios.forEach(radio => {
 	    radio.addEventListener('change', () => {
 	      if (radio.checked) select.value = '';
@@ -182,7 +182,7 @@
 	
 	});
 	
-	// 5) DELETE API (lascia così com’è)
+	// DELETE API (lascia così com’è)
 	  window.submitImageDelete = function(bookId, imageId) {
 	    if (!confirm('Vuoi davvero eliminare questa immagine?')) return;
 	    fetch(`/books/${bookId}/images/${imageId}`, {
