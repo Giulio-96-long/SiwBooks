@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	layout:decorate="~{layout}" layout:fragment="content" th:with="title=${book.title}">
+	layout:decorate="~{layout}" th:with="title=${book.title}">
 
+<section layout:fragment="content">
 	<div class="container py-4 border p-3">
 
 		<!-- Titolo -->
@@ -231,4 +232,6 @@
 			</div>
 		</div>
 	</div>
+</section>
+
 </html>
